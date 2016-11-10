@@ -20,7 +20,7 @@ public class Solution {
         int q = input.nextInt();
         Tree tree = new Tree(n);
         for(int i=0; i<n; i++){
-            tree.addNode(input.nextInt());
+            tree.addNode(input.nextInt(),i+1);
         }
         
         for(int i=0; i<n-1; i++){
@@ -38,13 +38,30 @@ public class Solution {
             //System.out.println(path1+" "+path2);
             
             int count = 0;
+            
+            HashMap<Integer, HashSet<Integer>> xmap = new HashMap<>();
             for(int ni:path1){
-                for(int nj:path2){
-                    if(ni != nj){
-                        if(tree.map.get(ni).value == tree.map.get(nj).value){
-                            count++;
-                        }
+                int value = tree.map.get(ni).value;
+                if(xmap.containsKey(value)){
+                    xmap.get(value).add(ni);
+                }else{
+                    HashSet<Integer> xset = new HashSet<>();
+                    xset.add(ni);
+                    xmap.put(value, xset);
+                }
+            }
+            //System.out.println(xmap);
+            for(int nj:path2){
+                int value = tree.map.get(nj).value;
+                if(xmap.containsKey(value)){
+                    int setSize = xmap.get(value).size();
+                    if(xmap.get(value).contains(nj)){
+                        count += setSize-1;
+                    }else{
+                        count += setSize;
                     }
+                }else{
+                    continue;
                 }
             }
             System.out.println(count);
@@ -53,7 +70,6 @@ public class Solution {
     
     public static class Tree{
         int n;
-        int ncurr = 1;
         HashMap<Integer, Node> map;
         
         Tree(int n){
@@ -61,9 +77,9 @@ public class Solution {
             this.map = new HashMap<>(n);
         }
         
-        public void addNode(int value){
-            Node node = new Node(ncurr,value);
-            map.put(ncurr++,node);
+        public void addNode(int value, int pos){
+            Node node = new Node(pos,value);
+            map.put(pos,node);
         }
         
         public void addEdge(int node1, int node2){
@@ -105,9 +121,7 @@ public class Solution {
                 tree.map.get(child).dfs(tree);
                 for(int grandchild: tree.map.get(child).pathToChild.keySet()){
                     this.pathToChild.put(grandchild, new ArrayList<Integer>());
-                    for(int pathNode:tree.map.get(child).pathToChild.get(grandchild)){
-                        this.pathToChild.get(grandchild).add(pathNode);
-                    }
+                    this.pathToChild.get(grandchild).addAll(tree.map.get(child).pathToChild.get(grandchild));
                 }
             }
             
@@ -117,7 +131,11 @@ public class Solution {
         }
         
         public ArrayList<Integer> getPath(int in, Tree tree){
-            if(this.pathToChild.containsKey(in)){
+            if(this.nodeId == in){
+                ArrayList<Integer> list = new ArrayList<>();
+                list.add(in);
+                return list;
+            }else if(this.pathToChild.containsKey(in)){
                 return this.pathToChild.get(in);
             }else{
                 ArrayList<Integer> list = new ArrayList<Integer>();
