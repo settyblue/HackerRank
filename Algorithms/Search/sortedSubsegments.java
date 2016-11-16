@@ -25,7 +25,7 @@ public class Solution {
         for(int i=0; i<q; i++){
             int r = input.nextInt();
             int s = input.nextInt();
-            Arrays.sort(array,r,s+1);
+            Arrays.parallelSort(array,r,s+1);
         }
         //System.out.println(Arrays.toString(array));
         System.out.println(array[k]);
